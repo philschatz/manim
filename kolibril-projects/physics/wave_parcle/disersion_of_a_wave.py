@@ -98,7 +98,7 @@ class WConst(Scene):
         lab2.next_to(image2,LEFT, buff=-0.3)
         lab3.next_to(image3,LEFT, buff=-0.3)
         self.add(lab1,lab2,lab3)
-        self.play(tr_time3.set_value, t2, run_time=7, rate_func=linear)
+        self.play(tr_time3.set_value, t2, run_time=12, rate_func=linear)
         self.wait()
 
 
@@ -110,5 +110,5 @@ if __name__ == "__main__":
     project_path = Path(sys.path[1]).parent
     script_name = f"{Path(__file__).resolve()}"
     os.system(
-        f"manim  --custom_folders -l --disable_caching  -p -c 'WHITE' --config_file '{project_path}/manim_settings.cfg' " + script_name)
+        f"manim  --custom_folders  --disable_caching  -p -c 'WHITE' --config_file '{project_path}/manim_settings.cfg' " + script_name)
 
