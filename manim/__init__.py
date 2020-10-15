@@ -21,6 +21,8 @@ from .animation.specialized import *
 from .animation.transform import *
 from .animation.update import *
 
+from .renderer.cairo_renderer import *
+
 from .camera.camera import *
 from .camera.mapping_camera import *
 from .camera.moving_camera import *
@@ -79,3 +81,4 @@ from .utils.sounds import *
 from .utils.space_ops import *
 from .utils.strings import *
 from .utils.tex import *
+from .utils.tex_templates import *
