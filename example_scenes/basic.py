@@ -1,14 +1,15 @@
 from manim import *
 
-class InCodeTexTemplateExample(Scene):
+from manim import *
+class Text3D(ThreeDScene):
     def construct(self):
-        myTemplate = TexTemplate()
-        myTemplate.add_to_preamble(r"\usepackage{amsfonts}")
-        myTemplate.tex_compiler = "pdflatex"
-        myTemplate.output_format = ".pdf"
-        text = MathTex(r"\mathbb{M} ", tex_template=myTemplate)
-        self.play(Write(text))
-        self.wait(1)
+        axes = ThreeDAxes()
+        self.set_camera_orientation(phi=75 * DEGREES,theta=-45*DEGREES)
+        text=TextMobject("This is a 3D text")
+        self.add_fixed_in_frame_mobjects(text.to_corner(UL))
+        self.add(axes)
+        self.add(text)
+        self.wait()
 
 import os ; import sys
 from pathlib import Path
