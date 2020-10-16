@@ -99,7 +99,6 @@ class Fermat(Scene):
         self.play(Write(eq2.submobjects[1]))
 
 
-num="10"
 import os ; import sys
 from pathlib import Path 
 if __name__ == "__main__":
