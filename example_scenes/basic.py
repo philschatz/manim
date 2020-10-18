@@ -1,7 +1,6 @@
 from manim import *
 
-from manim import *
-class Text3D(ThreeDScene):
+class ABC(Scene):
     def construct(self):
         axes = ThreeDAxes()
         self.set_camera_orientation(phi=75 * DEGREES,theta=-45*DEGREES)
@@ -9,7 +8,7 @@ class Text3D(ThreeDScene):
         self.add_fixed_in_frame_mobjects(text.to_corner(UL))
         self.add(axes)
         self.add(text)
-        self.wait()
+        self.wait(1)
 
 import os ; import sys
 from pathlib import Path
