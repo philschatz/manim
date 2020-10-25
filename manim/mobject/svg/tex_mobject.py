@@ -52,12 +52,11 @@ class SingleStringMathTex(SVGMobject):
     CONFIG = {
         "stroke_width": 0,
         "fill_opacity": 1.0,
-        "background_stroke_width": 1,
+        "background_stroke_width": 0,
         "background_stroke_color": BLACK,
         "should_center": True,
         "height": None,
         "organize_left_to_right": False,
-        "alignment": "",
         "tex_environment": "align*",
         "tex_template": None,
     }
@@ -84,7 +83,7 @@ class SingleStringMathTex(SVGMobject):
         return f"{type(self).__name__}({repr(self.tex_string)})"
 
     def get_modified_expression(self, tex_string):
-        result = self.alignment + " " + tex_string
+        result = tex_string
         result = result.strip()
         result = self.modify_special_strings(result)
         return result
@@ -286,7 +285,7 @@ class MathTex(SingleStringMathTex):
     def index_of_part(self, part):
         split_self = self.split()
         if part not in split_self:
-            raise Exception("Trying to get index of part not in MathTex")
+            raise ValueError("Trying to get index of part not in MathTex")
         return split_self.index(part)
 
     def index_of_part_by_tex(self, tex, **kwargs):
@@ -311,9 +310,8 @@ class Tex(MathTex):
     """
 
     CONFIG = {
-        "alignment": "\\centering",
         "arg_separator": "",
-        "tex_environment": None,
+        "tex_environment": "center",
     }
 
 
@@ -322,7 +320,7 @@ class BulletedList(Tex):
         "buff": MED_LARGE_BUFF,
         "dot_scale_factor": 2,
         # Have to include because of handle_multiple_args implementation
-        "alignment": "",
+        "tex_environment": None,
     }
 
     def __init__(self, *items, **kwargs):
@@ -341,7 +339,7 @@ class BulletedList(Tex):
         elif isinstance(arg, int):
             part = self.submobjects[arg]
         else:
-            raise Exception("Expected int or string, got {0}".format(arg))
+            raise TypeError("Expected int or string, got {0}".format(arg))
         for other_part in self.submobjects:
             if other_part is part:
                 other_part.set_fill(opacity=1)
