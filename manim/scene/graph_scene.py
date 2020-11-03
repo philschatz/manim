@@ -117,11 +117,10 @@ class GraphScene(Scene):
         if self.x_axis_label:
             x_label = Tex(self.x_axis_label)
             x_label.next_to(
-                x_axis.get_tips() if self.include_tip else x_axis.get_tick_marks(),
+                x_axis.get_corner(self.x_label_position),
                 self.x_label_position,
                 buff=SMALL_BUFF,
             )
-            x_label.shift_onto_screen()
             x_axis.add(x_label)
             self.x_axis_label_mob = x_label
 
@@ -164,7 +163,6 @@ class GraphScene(Scene):
                 self.y_label_position,
                 buff=SMALL_BUFF,
             )
-            y_label.shift_onto_screen()
             y_axis.add(y_label)
             self.y_axis_label_mob = y_label
 
@@ -520,7 +518,7 @@ class GraphScene(Scene):
             elif input_sample_type == "center":
                 sample_input = x + 0.5 * dx
             else:
-                raise Exception("Invalid input sample type")
+                raise ValueError("Invalid input sample type")
             graph_point = self.input_to_graph_point(sample_input, graph)
             if bounded_graph == None:
                 y_point = 0
@@ -1027,7 +1025,7 @@ class GraphScene(Scene):
         NOTE: At least one of target_dx and target_x should be not None.
         """
         if target_dx is None and target_x is None:
-            raise Exception("At least one of target_x and target_dx must not be None")
+            raise ValueError("At least one of target_x and target_dx must not be None")
         if added_anims is None:
             added_anims = []
 

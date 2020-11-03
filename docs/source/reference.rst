@@ -10,9 +10,9 @@ the :doc:`changelog`.
 
 .. currentmodule:: manim
 
-********************
-Mathematical Objects
-********************
+********
+Mobjects
+********
 
 .. autosummary::
    :toctree: reference
@@ -29,7 +29,6 @@ Mathematical Objects
    ~mobject.numbers
    ~mobject.probability
    ~mobject.shape_matchers
-   ~mobject.three_d_shading_utils
    ~mobject.three_d_utils
    ~mobject.three_dimensions
    ~mobject.value_tracker
@@ -129,14 +128,6 @@ Other modules
 .. autosummary::
    :toctree: reference
 
-   _config
+   config
    constants
    container
-
-
-.. This is here so that sphinx doesn't complain about changelog.rst not being
-   included in any toctree
-.. toctree::
-   :hidden:
-
-   changelog

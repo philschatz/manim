@@ -401,13 +401,14 @@ class VectorScene(Scene):
             )
         )
         self.play(ShowCreation(x_line))
-        self.play(
+        animations = [
             ApplyFunction(
                 lambda y: self.position_y_coordinate(y, y_line, vector), y_coord
             ),
             FadeOut(array.get_brackets()),
-        )
-        y_coord, brackets = self.mobjects_from_last_animation
+        ]
+        self.play(*animations)
+        y_coord, _ = [anim.mobject for anim in animations]
         self.play(ShowCreation(y_line))
         self.play(ShowCreation(arrow))
         self.wait()
@@ -871,7 +872,7 @@ class LinearTransformationScene(VectorScene):
             new_matrix[:2, :2] = transposed_matrix
             transposed_matrix = new_matrix
         elif transposed_matrix.shape != (3, 3):
-            raise Exception("Matrix has bad dimensions")
+            raise ValueError("Matrix has bad dimensions")
         return lambda point: np.dot(point, transposed_matrix)
 
     def get_piece_movement(self, pieces):

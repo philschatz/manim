@@ -10,7 +10,7 @@ import os
 import hashlib
 from pathlib import Path
 
-from .. import file_writer_config, config, logger
+from .. import config, logger
 
 
 def tex_hash(expression):
@@ -72,7 +72,7 @@ def generate_tex_file(expression, environment=None, tex_template=None):
     else:
         output = tex_template.get_texcode_for_expression(expression)
 
-    tex_dir = file_writer_config["tex_dir"]
+    tex_dir = config.get_dir("tex_dir")
     if not os.path.exists(tex_dir):
         os.makedirs(tex_dir)
 
@@ -156,7 +156,7 @@ def compile_tex(tex_file, tex_compiler, output_format):
     result = tex_file.replace(".tex", output_format)
     result = Path(result).as_posix()
     tex_file = Path(tex_file).as_posix()
-    tex_dir = Path(file_writer_config["tex_dir"]).as_posix()
+    tex_dir = Path(config.get_dir("tex_dir")).as_posix()
     if not os.path.exists(result):
         command = tex_compilation_command(
             tex_compiler, output_format, tex_file, tex_dir
@@ -205,4 +205,14 @@ def convert_to_svg(dvi_file, extension, page=1):
             os.devnull,
         ]
         os.system(" ".join(commands))
+
+    # if the file does not exist now, this means conversion failed
+    if not os.path.exists(result):
+        raise ValueError(
+            f"Your installation does not support converting {extension} files to SVG."
+            f" Consider updating dvisvgm to at least version 2.4."
+            f" If this does not solve the problem, please refer to our troubleshooting guide at:"
+            f" https://manimce.readthedocs.io/en/latest/installation/troubleshooting.html"
+        )
+
     return result

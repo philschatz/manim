@@ -14,7 +14,7 @@ import os
 import subprocess
 import sys
 from distutils.sysconfig import get_python_lib
-
+from pathlib import Path
 
 sys.path.insert(0, os.path.abspath("."))
 
@@ -39,7 +39,7 @@ if os.environ.get("READTHEDOCS") == "True":
 
 # -- Project information -----------------------------------------------------
 
-project = "manim"
+project = "Manim"
 copyright = "2020, The Manim Community Dev Team"
 author = "The Manim Community Dev Team"
 
@@ -52,6 +52,7 @@ author = "The Manim Community Dev Team"
 extensions = [
     "sphinx.ext.autodoc",
     "recommonmark",
+    "sphinx_copybutton",
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
@@ -60,6 +61,10 @@ extensions = [
 
 # Automatically generate stub pages when using the .. autosummary directive
 autosummary_generate = True
+
+# controls whether functions documented by the autofunction directive
+# appear with their full module names
+add_module_names = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -79,6 +84,7 @@ import guzzle_sphinx_theme
 
 html_theme_path = guzzle_sphinx_theme.html_theme_path()
 html_theme = "guzzle_sphinx_theme"
+html_favicon = str(Path("_static/favicon.ico"))
 
 # There's a standing issue with Sphinx's new-style sidebars.  This is a
 # workaround.  Taken from
