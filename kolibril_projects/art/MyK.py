@@ -10,7 +10,7 @@ class MyK(Scene):
     def construct(self):
         myTemplate = TexTemplate()
         myTemplate.add_to_preamble(r"\usepackage{mathrsfs}")
-        tex = Tex(r'$\mathbb{K}$}', tex_template=myTemplate).set_color(BLACK).rescale_to_fit(length=1.5*config.frame_height, dim =0)
+        tex = Tex(r'$\mathbb{H}$}', tex_template=myTemplate).set_color(BLACK).rescale_to_fit(length=1.5*config.frame_height, dim =0)
         self.add(tex)
 import os ; import sys
 from pathlib import Path
