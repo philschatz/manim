@@ -1,19 +1,12 @@
 from manim import *
 
 
-class AnimFunc1(Scene):
-    def construct(self):
-        dot = Dot(radius=3)
-        anim = FadeToColor(dot, RED_D)
-        anim.begin()
-        anim.interpolate(0.5)
-        self.add(dot)
 
 def control_anim_with_alpha(anim,alpha):
     anim.begin()
     anim.interpolate(alpha)
 
-class AnimFunc2(Scene):
+class AnimFunc  (Scene):
     def construct(self):
         triangle = Triangle().set_height(4)
         triangle.save_state()
@@ -30,3 +23,10 @@ class AnimFunc2(Scene):
             run_time=4
         )
         self.wait()
+
+import os ; import sys
+from pathlib import Path
+if __name__ == "__main__":
+    project_path = Path(sys.path[1]).parent
+    script_name = f"{Path(__file__).resolve()}"
+    os.system(f"manim  -l --custom_folders  --disable_caching  -p -c 'BLACK' --config_file '{project_path}/manim_settings.cfg' " + script_name)

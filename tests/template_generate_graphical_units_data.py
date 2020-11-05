@@ -7,12 +7,17 @@ from tests.helpers.graphical_units import set_test_scene
 # More about graphical unit tests: https://github.com/ManimCommunity/manim/wiki/Testing#graphical-unit-test
 
 
-class YourClassHere(Scene):
+class FixedInFrameMObjectTest(ThreeDScene):
     def construct(self):
-        circle = Circle()
-        self.play(Animation(circle))
+        axes = ThreeDAxes()
+        self.set_camera_orientation(phi=75 * DEGREES, theta=-45 * DEGREES)
+        circ = Circle()
+        self.add_fixed_in_frame_mobjects(circ)
+        circ.to_corner(UL)
+        self.add(axes)
+
 
 
 set_test_scene(
-    YourClassHere, "<module_name>"
+    FixedInFrameMObjectTest, "threed"
 )  # <module_name> can be e.g.  "geometry" or "movements"
