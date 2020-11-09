@@ -36,20 +36,18 @@ def IPcontraststretch(image):
     stretched_img = (256 - 1) / (M - m) * (image - m)
     return np.uint8(stretched_img)
 
-class Poisson_noise(Scene):
+class PoissonNoise(Scene):
     def construct(self):
         seed = 42 # initilize the randomness for the poisson noise
         np.random.RandomState(seed)
         poission_With_one_pixel=[]
         text_for_the_images= []
         histograms= []
-        rep_rate=1
-        photon_intensities= range(1,20)
-        rep_rate=1
+        photon_intensities= range(1,250)
+        rep_rate=15
         # photon_intensities=[1]
         #
         max = 256
-
 
         for photons_val in photon_intensities:
             for i in range(0,rep_rate):
@@ -64,7 +62,7 @@ class Poisson_noise(Scene):
                  histograms.append(hist)
                  print(photons_val)
 
-        poission_With_one_pixel_ALL= [ImageMobject(img_a).scale(2.5) for img_a in poission_With_one_pixel]
+        poission_With_one_pixel_ALL= [ImageMobject(img_a) for img_a in poission_With_one_pixel]
 
         for PLOT,text,hist in zip(poission_With_one_pixel_ALL,text_for_the_images,histograms):
             self.clear()
@@ -77,8 +75,7 @@ class Poisson_noise(Scene):
             self.add(t_2)
             hist.to_edge(RIGHT)
             self.add(hist)
-            print(text)
-            self.wait(0.33)
+            self.wait(1/15)
 
 
 
@@ -87,7 +84,7 @@ from pathlib import Path
 if __name__ == "__main__":
     project_path = Path(sys.path[1]).parent
     script_name = f"{Path(__file__).resolve()}"
-    os.system(f"manim  -l --custom_folders  --disable_caching -s -p -c 'BLACK' --config_file '{project_path}/manim_settings.cfg' " + script_name)
+    os.system(f"manim   --custom_folders  --disable_caching  -p -c 'BLACK' --config_file '{project_path}/manim_settings.cfg' " + script_name)
 
 
 
