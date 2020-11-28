@@ -2,7 +2,7 @@
 
 # Importing the config module should be the first thing we do, since other
 # modules depend on the global config dict for initialization.
-from .config import *
+from ._config import *
 
 from .constants import *
 
@@ -56,7 +56,11 @@ from .mobject.vector_field import *
 from .scene.graph_scene import *
 from .scene.moving_camera_scene import *
 from .scene.reconfigurable_scene import *
-from .scene.js_scene import *
+
+try:
+    from .scene.js_scene import *
+except ModuleNotFoundError:
+    pass  # optional deps
 from .scene.scene import *
 from .scene.sample_space_scene import *
 from .scene.three_d_scene import *

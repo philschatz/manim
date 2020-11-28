@@ -1,22 +1,12 @@
-"""
-main_utils.py
--------------
-
-Functions called from __main__.py to interact with the config.
-
-"""
+"""Utilities called from ``__main__.py`` to interact with the config."""
 
 import os
-import sys
 import argparse
-import logging
 
-import colour
+from manim import constants
 
-from manim import constants, logger, config
-from .utils import make_config_parser
-from .logger import JSONFormatter
-from ..utils.tex import TexTemplate, TexTemplateFromFile
+
+__all__ = ["parse_args"]
 
 
 def _find_subcommand(args):
@@ -84,6 +74,7 @@ def _init_cfg_subcmd(subparsers):
 
 
 def _str2bool(s):
+    """Helper function that handles boolean CLI arguments."""
     if s == "True":
         return True
     elif s == "False":
@@ -93,8 +84,24 @@ def _str2bool(s):
 
 
 def parse_args(args):
+    """Parse CLI arguments.
+
+    Parameters
+    ----------
+    args : :class:`list`
+        A list of arguments; generally, this should be ``sys.argv``.
+
+    Returns
+    -------
+    :class:`argparse.Namespace`
+        An object returned by ``argparse.parse_args``.
+
+    """
     if args[0] == "python" and args[1] == "-m":
         args = args[2:]
+
+    if len(args) == 1:
+        return _parse_args_no_subcmd(args)
 
     subcmd = _find_subcommand(args)
     if subcmd == "cfg":
@@ -144,6 +151,7 @@ def _parse_args_cfg_subcmd(args):
 
 
 def _parse_args_no_subcmd(args):
+    """Parse arguments of the form 'manim <args>', when no command is present."""
     parser = argparse.ArgumentParser(
         description="Animation engine for explanatory math videos",
         prog="manim",
@@ -302,7 +310,11 @@ def _parse_args_no_subcmd(args):
     parser.add_argument(
         "-q",
         "--quality",
-        choices=[constants.QUALITIES[q]["flag"] for q in constants.QUALITIES],
+        choices=[
+            constants.QUALITIES[q]["flag"]
+            for q in constants.QUALITIES
+            if constants.QUALITIES[q]["flag"]
+        ],
         default=constants.DEFAULT_QUALITY_SHORT,
         help="Render at specific quality, short form of the --*_quality flags",
     )
