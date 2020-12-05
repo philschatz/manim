@@ -16,6 +16,7 @@ Installing dependencies
    installation/linux
    installation/troubleshooting
    installation/for_dev
+   installation/plugins
 
 
 .. _installing-manim:
@@ -28,9 +29,12 @@ can install it from PyPI via pip:
 
 .. code-block:: bash
 
-   pip install manimce
+   pip install manim
 
-You can replace ``pip`` with ``pip3`` is you need to in your system.
+You can replace ``pip`` with ``pip3`` if you need to in your system.
+
+Alternatively, you can work with Manim using our Docker image that can be
+found at `Docker Hub <https://hub.docker.com/r/manimcommunity/manim>`_.
 
 If you'd like to contribute to and/or help develop ``manim-community``, you can
 clone this repository to your local device.  To do this, first make sure you
