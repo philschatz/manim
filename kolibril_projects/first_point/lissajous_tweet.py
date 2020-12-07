@@ -32,7 +32,8 @@ class TwitterScene(Scene):
             ShowCreation(dummy_func),
             ShowCreation(func2),
             ShowCreation(func1),
-            run_time=1
+            rate_func= linear,
+            run_time=9
         )
         self.add(func1)
         self.wait()
