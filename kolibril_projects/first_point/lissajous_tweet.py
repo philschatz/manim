@@ -1,47 +1,35 @@
 from manim import *
 
+text = r"""
+\begin{filecontents}{\jobname.bib}
+@book{key,
+  author = {Author, A.},
+  year = {2001},
+  title = {Title},
+  publisher = {Publisher},
+}
+\end{filecontents}
 
-def lissajous_curve_func(t):
-    return np.array((np.sin(3 * t), np.sin(4 * t) + 2 / 3 * PI, 0))
+\begin{document}
 
+Hello World^\cite{key}
 
-class TwitterScene(Scene):
+\bibliographystyle{plain}
+\bibliography{\jobname}
+
+\end{document}
+"""
+
+class AddPackageLatex(Scene):
     def construct(self):
-        self.camera.background_color = "#ece6e2"
-        dot = Dot()
-        dummy_func = ParametricFunction(lissajous_curve_func, t_max=TAU, fill_opacity=0)
-        dummy_func.scale(2).move_to(ORIGIN)
-        func1 = dummy_func.copy().set_stroke(width=18)
-        func1 = CurvesAsSubmobjects(func1)
-        func1.set_color_by_gradient(YELLOW_A, YELLOW_D)
-        func2 = dummy_func.copy().set_color(BLACK).set_stroke(width=20)
-        dot.add_updater(lambda m: m.move_to(dummy_func.get_end()))
-        dummy_func.set_opacity(0)
-        # or dummy_func.fade(1) )
-        self.add(dot)
-        self.play(
-            ShowCreation(dummy_func),
-            ShowCreation(func2),
-            ShowCreation(func1),
-            rate_func=linear,
-            run_time=9,
-        )
-        self.add(func1)
-        self.wait()
-        banner = ManimBanner(dark_theme=False).scale(0.3).to_corner(DR)
-        self.play(FadeIn(banner))
-        self.play(banner.expand())
-        self.wait(3)
+        myTemplate = TexTemplate()
+        myTemplate.add_to_preamble(r"\documentclass{article}")
+        tex = Tex(text, tex_template=myTemplate).scale(3)
+        self.add(tex)
 
-
-import os
-import sys
+import os ; import sys
 from pathlib import Path
-
 if __name__ == "__main__":
     project_path = Path(sys.path[1]).parent
     script_name = f"{Path(__file__).resolve()}"
-    os.system(
-        f"manim   --custom_folders  --disable_caching   -p --config_file '{project_path}/manim_settings.cfg' "
-        + script_name
-    )
+    os.system(f"manim  -l --custom_folders  --disable_caching -s -p -c 'BLACK' --config_file '{project_path}/manim_settings.cfg' " + script_name)
