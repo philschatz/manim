@@ -52,6 +52,7 @@ class Example(Scene):
         dashedline = DashedLine(LEFT*config.frame_width/2, RIGHT*config.frame_width/2).set_opacity(0.5)
         # dashedline.add_updater(lambda x: x.set_y(mass1.get_center()[1]))
         dashedline.set_y(mass1.get_center()[1])
+        print(mass1.get_center()[1])
         self.add(mass1,dashedline,anchor1,line1, mass1)
         self.add(mass2,anchor2,line2, mass2)
         self.play(t.increment_value, 12 ,rate_func = linear , run_time=10)

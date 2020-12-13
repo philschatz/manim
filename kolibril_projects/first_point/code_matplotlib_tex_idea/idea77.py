@@ -7,6 +7,7 @@ class GraphExample(Scene):
                                   [0.5, 1.,  0. ],
                                  [0.,  0.,  1. ]]))
         img = ImageMobject("noeter.jpg").scale(0.3)
+        img = ImageMobject
         self.add(img)
         self.add(sq)
 
