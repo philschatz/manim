@@ -9,7 +9,7 @@ class MovingCameraOnGraph(GraphScene, MovingCameraScene):
         self.camera_frame.scale(1.2)
         mobject= Mobject()
         def camera_zoom(mobj, dt):
-            self.camera_frame.scale(.99)
+            self.camera_frame.scale(.9975)
         self.add(mobject)
         mobject.add_updater(camera_zoom)
 
