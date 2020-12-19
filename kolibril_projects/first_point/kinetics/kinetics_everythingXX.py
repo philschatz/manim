@@ -40,9 +40,9 @@ class Kinetics(ZoomedScene):
         r1 = 5
         r2= 6
         r3 = 7
-        speed1=0.7
-        speed2=1
-        speed3=1.5
+        speed1=0.7/2
+        speed2=1/2
+        speed3=1.5/2
         # start_here 1
         radius = r1
         t_min = 0
@@ -63,7 +63,7 @@ class Kinetics(ZoomedScene):
                 ob.time += 0.01*t_max1/lenf1*speed1
                 ob.move_to(f1(ob.time))
                 if ob.time >= t_max1:
-                    mobj.submobjects.remove(ob)
+                    ob.set_opacity(0)
             mobj.timex += 1
 
         param_func1.timex = 0
@@ -88,7 +88,7 @@ class Kinetics(ZoomedScene):
                 ob.time += 0.01*t_max2/lenf2*speed2
                 ob.move_to(f2(ob.time))
                 if ob.time >= t_max2:
-                    mobj.submobjects.remove(ob)
+                    ob.set_opacity(0)
             mobj.timex += 1
         param_func2.timex = 0
         param_func2.add_updater(func_updater2)
@@ -106,13 +106,14 @@ class Kinetics(ZoomedScene):
         dot3 = Dot(fill_color=dot_color).scale(0.5)
         dot3.time = 0
         def func_updater3(mobj, dt):
+            rem= False
             if mobj.timex % 30 == 0:
                 mobj.submobjects.append(dot3.copy())
             for ob in mobj.submobjects:
                 ob.time += 0.01*t_max3/lenf3*speed3
                 ob.move_to(f3(ob.time))
                 if ob.time >= t_max3:
-                    mobj.submobjects.remove(ob)
+                    ob.set_opacity(0)
             mobj.timex += 1
         param_func3.timex = 0
         param_func3.add_updater(func_updater3)
@@ -132,7 +133,7 @@ class Kinetics(ZoomedScene):
         self.add(bg,text2)
         self.bring_to_front(sq)
         def update_mobj(mobj,dt):
-            mobj.rotate(-2*dt, about_point=rot_anchor)
+            mobj.rotate(-0.5*dt, about_point=rot_anchor)
             self.tttime += dt
         kinetiker.add_updater(update_mobj)
         self.wait(2)
@@ -147,10 +148,10 @@ class Kinetics(ZoomedScene):
         zoomed_display_frame.set_color(RED)
         zoomed_display.next_to(sq.get_top()+SMALL_BUFF*DOWN*3,RIGHT).set_x(rot_anchor[0])
         self.add(frame,zoomed_display)
-        self.wait(10)
+        self.wait(25)
 import os ; import sys
 from pathlib import Path
 if __name__ == "__main__":
     project_path = Path(sys.path[1]).parent
     script_name = f"{Path(__file__).resolve()}"
-    os.system(f"manim  --custom_folders   --disable_caching  -m -p  -c 'WHITE' --config_file '{project_path}/manim_settings.cfg' " + script_name)
+    os.system(f"manim  --custom_folders  --progress_bar False --disable_caching   -p  -c 'WHITE' --config_file '{project_path}/manim_settings.cfg' " + script_name)
