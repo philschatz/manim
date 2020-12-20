@@ -94,5 +94,5 @@ if __name__ == "__main__":
     project_path = Path(sys.path[1]).parent
     script_name = f"{Path(__file__).resolve()}"
     os.system(
-        f"manim   --custom_folders  -p -i -m --disable_caching   "
+        f"manim   --custom_folders  -p  --disable_caching   "
         f" -c 'BLACK' --config_file '{project_path}/manim_settings.cfg' " + script_name)

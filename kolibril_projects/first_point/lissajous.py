@@ -1,24 +1,33 @@
 from manim import *
 
-def lissajous_curve_func(t):
-    return np.array((np.sin(3 * t), np.sin(4 * t)+2/3*PI, 0))
 
-class PointWithTrace(Scene):
+def lissajous_curve_func(t):
+    return np.array((np.sin(3 * t), np.sin(4 * t) + 2 / 3 * PI, 0))
+
+
+class TwitterScene(Scene):
     def construct(self):
-        path = VMobject()
+        self.camera.background_color = "#ece6e2"
         dot = Dot()
-        path.set_points_as_corners([dot.get_center(), dot.get_center()])
-        def update_path(path):
-            previous_path = path.copy()
-            self.remove(previous_path)
-            path.add_points_as_corners([dot.get_center()])
-            self.add(path)
-        path.add_updater(update_path)
-        func = ParametricFunction(lissajous_curve_func, t_max=TAU, fill_opacity=0).scale(3).move_to(ORIGIN)
-        self.add(path)
-        dot = AnnotationDot().scale(2)
-        self.play(MoveAlongPath(dot, func), rate_func= linear , run_time=9)
-        self.wait(0.1)
+        dummy_func = ParametricFunction(lissajous_curve_func, t_max=TAU, fill_opacity=0)
+        dummy_func.scale(2).move_to(ORIGIN)
+        func1 = dummy_func.copy().set_stroke(width=18)
+        func1 = CurvesAsSubmobjects(func1)
+        func1.set_color_by_gradient(YELLOW_A, YELLOW_D)
+        func2 = dummy_func.copy().set_color(BLACK).set_stroke(width=20)
+        dot.add_updater(lambda m: m.move_to(dummy_func.get_end()))
+        dummy_func.set_opacity(0)
+        # or dummy_func.fade(1) )
+        self.add(dot)
+        self.play(
+            ShowCreation(dummy_func),
+            ShowCreation(func2),
+            ShowCreation(func1),
+            rate_func=linear,
+            run_time=9,
+        )
+        self.add(func1)
+        self.wait()
 
 import os ; import sys
 from pathlib import Path

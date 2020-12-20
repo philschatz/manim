@@ -1,14 +1,14 @@
 from manim import *
 
-class Example(Scene):
+class MovingAround(Scene):
     def construct(self):
-        emmy= Text("Emmy Noether").to_edge(UP)
-        img= ImageMobject("/home/jan-hendrik/projects/manim_resources/imgs_and_svgs/noeter.jpg").scale(0.5).next_to(emmy, DOWN)
-        form = MathTex(r"\partial_\mu j^\mu = 0 ,\, j^\mu = \frac{\partial L}{\partial (\partial_{\mu} \phi)} \Delta \phi").next_to(img,DOWN)
-        self.add(img,emmy)
-        self.play(Write(form))
-        self.wait()
+        config.frame_rate=50
+        square = Square(color=BLUE, fill_opacity=1)
 
+        self.play(square.shift, LEFT)
+        self.play(square.set_fill, ORANGE)
+        self.play(square.scale, 0.3)
+        self.play(square.rotate, 0.4)
 
 import os ; import sys
 from pathlib import Path
