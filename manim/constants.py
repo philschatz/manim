@@ -153,7 +153,7 @@ QUALITIES: typing.Dict[str, typing.Dict[str, typing.Union[str, int, None]]] = {
         "flag": "h",
         "pixel_height": 1080,
         "pixel_width": 1920,
-        "frame_rate": 2,
+        "frame_rate": 50,
     },
     "medium_quality": {
         "flag": "m",

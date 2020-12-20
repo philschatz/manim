@@ -1,6 +1,6 @@
 from manim import *
 
-class Kinetics(Scene):
+class KineticsPartA(Scene):
     def construct(self):
 
         GREY_BLACK = "#a9a9a9"
@@ -26,6 +26,7 @@ class Kinetics(Scene):
 
         silv = Square(silver_size*2, fill_color=SILVER, stroke_color=SILVER, fill_opacity=1).move_to(silver_coord)
         silv.title = Tex("Silberquelle", color=BLACK).scale(0.5).next_to(silv,LEFT, buff=1.6)
+        silv.title.shift(0.55*RIGHT)
 
 
         self.add(silv,silv.title)
@@ -98,6 +99,9 @@ class Kinetics(Scene):
         slitB = VGroup(Line([-1, 0.5,0],[0-split_width, 0.5,0]),Line([0+split_width, 0.5,0],[1, 0.5,0])).set_color(BLACK)
         self.play(slit_annotA.rotate, 9*DEGREES, LEFT, slit_annotB.rotate, 9*DEGREES, LEFT)
         self.play(FadeOutAndShift(slit_annotA, RIGHT), FadeOutAndShift(slit_annotB, RIGHT),FadeIn(slitA), FadeIn(slitB))
+        slit_annotA.title.shift(RIGHT+0.3*DOWN)
+        slit_annotB.title.shift(RIGHT+0.3*DOWN)
+
         ### shooters:
         shootingdotslong3 = [Dot(silv.get_center()).set_color(BLACK) for _ in range(0,50)]
         distance3= 4
@@ -119,7 +123,6 @@ class Kinetics(Scene):
             mobj.subdot.move_to(point)
             mobj.subdot.set_opacity(1-mobj.time)
             mobj.time += 1 / config["frame_rate"]*0.01*mobj.val /distance3
-
 
         for mobj in shootingdotslong:
             mobj.subdot.scale(0.4)
