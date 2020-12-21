@@ -168,9 +168,13 @@ class Kinetics(ZoomedScene):
         zoomed_display.next_to(sq.get_top()+SMALL_BUFF*DOWN*3,RIGHT).set_x(rot_anchor[0])
         self.add(frame,zoomed_display)
         # for i in range(0,20): #for cold
+        l = VMobject()
+        self.add(l)
+        self.bring_to_back(l)
         #     self.play(MoveAlongPath(x1,Line(self.floor.get_center(), self.roof.get_center(), color= BLACK)),rate_func= linear)
-        for i in range(0,40): #for hot 40
-            self.play(MoveAlongPath(x1,Line(self.floor.get_center(), self.roof.get_center(), color= BLACK)),rate_func= linear, run_time=0.5)
+        for i in range(0,30): #for hot 40
+            l.become(Line(self.floor.get_center(), self.roof.get_center(), color= interpolate_color(SILVER,WHITE,0.3)))
+            self.play(MoveAlongPath(x1,Line(self.floor.get_center(), self.roof.get_center(), color= BLACK),rate_func= linear, run_time=0.5))
 
 
 import os ; import sys
@@ -178,4 +182,4 @@ from pathlib import Path
 if __name__ == "__main__":
     project_path = Path(sys.path[1]).parent
     script_name = f"{Path(__file__).resolve()}"
-    os.system(f"manim  --custom_folders -p   --progress_bar False --disable_caching   -p  -c 'WHITE' --config_file '{project_path}/manim_settings.cfg' " + script_name)
+    os.system(f"manim  --custom_folders -p   --progress_bar False --disable_caching   -m  -c 'WHITE' --config_file '{project_path}/manim_settings.cfg' " + script_name)
