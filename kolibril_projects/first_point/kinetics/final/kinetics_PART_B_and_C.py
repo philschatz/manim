@@ -2,7 +2,7 @@ from manim import *
 from sympy.abc import t
 from sympy import Curve
 from sympy import sin, cos
-class Kinetics(ZoomedScene):
+class KineticsHOT(ZoomedScene):
     def __init__(self, **kwargs):
         ZoomedScene.__init__(
             self,
@@ -37,7 +37,7 @@ class Kinetics(ZoomedScene):
         self.add(dashedl)
         # PART B)
         # cold
-        # T1 = MathTex(r"\text{T}_{\text{kalt}} = 20^\circ C").set_color(BLACK)
+        # T1 = MathTex(r"\text{T}_{\text{kalt}} = 20^\circ \text{C}").set_color(BLACK)
         # self.add(T1.scale(0.7).next_to(sq,LEFT).shift(2*DOWN))
         # r1 = 3.8
         # r2= 4.5
@@ -46,8 +46,8 @@ class Kinetics(ZoomedScene):
         # speed2=1/config.frame_rate*30
         # speed3=1.5/config.frame_rate*30
 
-        # # hot
-        T2 = MathTex(r"\text{T}_{\text{heiß}} = 500^\circ C").set_color(BLACK)
+        #hot
+        T2 = MathTex(r"\text{T}_{\text{heiß}} = 500^\circ \text{C}").set_color(BLACK)
         self.add(T2.scale(0.7).next_to(sq,LEFT).shift(2*DOWN))
         r1 = 8
         r2= 10.5
@@ -169,12 +169,16 @@ class Kinetics(ZoomedScene):
         self.add(frame,zoomed_display)
         # for i in range(0,20): #for cold
         l = VMobject()
-        self.add(l)
+        lxx = VMobject()
+        self.add(l, lxx)
+        self.bring_to_back(lxx)
         self.bring_to_back(l)
-        #     self.play(MoveAlongPath(x1,Line(self.floor.get_center(), self.roof.get_center(), color= BLACK)),rate_func= linear)
-        for i in range(0,30): #for hot 40
-            l.become(Line(self.floor.get_center(), self.roof.get_center(), color= interpolate_color(SILVER,WHITE,0.3)))
-            self.play(MoveAlongPath(x1,Line(self.floor.get_center(), self.roof.get_center(), color= BLACK),rate_func= linear, run_time=0.5))
+        self.partial_floor_val= ORIGIN
+        lxx.add_updater(lambda x: x.become(Line(self.partial_floor_val, x1.get_center()).set_color(interpolate_color(SILVER,WHITE,0.2))))
+        for i in range(0,40): #for hot 40
+            self.partial_floor_val = self.floor.get_center()
+            l.become(Line(self.floor.get_center(), self.roof.get_center(), color= interpolate_color(SILVER,WHITE,0.7)))
+            self.play(MoveAlongPath(x1,Line(self.floor.get_center(), self.roof.get_center(), color= BLACK),rate_func= linear, run_time=0.5)) # run_time1 for cold
 
 
 import os ; import sys
@@ -182,4 +186,4 @@ from pathlib import Path
 if __name__ == "__main__":
     project_path = Path(sys.path[1]).parent
     script_name = f"{Path(__file__).resolve()}"
-    os.system(f"manim  --custom_folders -p   --progress_bar False --disable_caching   -m  -c 'WHITE' --config_file '{project_path}/manim_settings.cfg' " + script_name)
+    os.system(f"manim  --custom_folders -p   --progress_bar False --disable_caching    -c 'WHITE' --config_file '{project_path}/manim_settings.cfg' " + script_name)
