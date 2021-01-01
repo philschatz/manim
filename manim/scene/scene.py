@@ -33,7 +33,7 @@ class Scene(Container):
 
     The primary role of :class:`Scene` is to provide the user with tools to manage
     mobjects and animations.  Generally speaking, a manim script consists of a class
-    that derives from :class:`Scene` whose :meth:`Scene.construct` method is overriden
+    that derives from :class:`Scene` whose :meth:`Scene.construct` method is overridden
     by the user's code.
 
     Mobjects are displayed on screen by calling :meth:`Scene.add` and removed from
@@ -175,7 +175,7 @@ class Scene(Container):
     def setup(self):
         """
         This is meant to be implemented by any scenes which
-        are comonly subclassed, and have some common setup
+        are commonly subclassed, and have some common setup
         involved before the construct method is called.
         """
         pass
@@ -183,7 +183,7 @@ class Scene(Container):
     def tear_down(self):
         """
         This is meant to be implemented by any scenes which
-        are comonly subclassed, and have some common method
+        are commonly subclassed, and have some common method
         to be invoked before the scene ends.
         """
         pass
@@ -204,7 +204,7 @@ class Scene(Container):
         Examples
         --------
         A typical manim script includes a class derived from :class:`Scene` with an
-        overriden :meth:`Scene.contruct` method:
+        overridden :meth:`Scene.contruct` method:
 
         .. code-block:: python
 
@@ -601,32 +601,39 @@ class Scene(Container):
         )
         return all_moving_mobject_families, static_mobjects
 
-    def compile_animations(self, *animations, **play_kwargs):
+    def compile_animations(self, *args, **kwargs):
         """
         Creates _MethodAnimations from any _AnimationBuilders and updates animation
         kwargs with kwargs passed to play().
-
         Parameters
         ----------
         *animations : Tuple[:class:`Animation`]
             Animations to be played.
-
         **play_kwargs
             Configuration for the call to play().
-
         Returns
         -------
         Tuple[:class:`Animation`]
             Animations to be played.
         """
-        for animation in animations:
-            if inspect.ismethod(animation):
+        animations = []
+        for arg in args:
+            if isinstance(arg, _AnimationBuilder):
+                animations.append(arg.build())
+            elif isinstance(arg, Animation):
+                animations.append(arg)
+            elif inspect.ismethod(arg):
                 raise TypeError(
-                    "Passing mobject methods to Scene.play is no longer supported. Use "
+                    "Passing Mobject methods to Scene.play is no longer supported. Use "
                     "Mobject.animate instead."
                 )
-            for k, v in play_kwargs.items():
+            else:
+                raise TypeError(f"Unexpected argument {arg} passed to Scene.play().")
+
+        for animation in animations:
+            for k, v in kwargs.items():
                 setattr(animation, k, v)
+
         return animations
 
     def _get_animation_time_progression(self, animations, duration):
