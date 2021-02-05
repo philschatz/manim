@@ -4,7 +4,6 @@ __all__ = [
     "Graph",
 ]
 
-from ..constants import UP
 from ..utils.color import BLACK
 from .types.vectorized_mobject import VMobject
 from .geometry import Dot, Line, LabeledDot
@@ -15,6 +14,141 @@ from typing import Hashable, Union, List, Tuple
 from copy import copy
 import networkx as nx
 import numpy as np
+
+
+def _determine_graph_layout(
+    nx_graph: nx.classes.graph.Graph,
+    layout: Union[str, dict] = "spring",
+    layout_scale: float = 2,
+    layout_config: Union[dict, None] = None,
+    partitions: Union[List[List[Hashable]], None] = None,
+    root_vertex: Union[Hashable, None] = None,
+) -> dict:
+    automatic_layouts = {
+        "circular": nx.layout.circular_layout,
+        "kamada_kawai": nx.layout.kamada_kawai_layout,
+        "planar": nx.layout.planar_layout,
+        "random": nx.layout.random_layout,
+        "shell": nx.layout.shell_layout,
+        "spectral": nx.layout.spectral_layout,
+        "partite": nx.layout.multipartite_layout,
+        "tree": _tree_layout,
+        "spiral": nx.layout.spiral_layout,
+        "spring": nx.layout.spring_layout,
+    }
+
+    custom_layouts = ["random", "partite", "tree"]
+
+    if layout_config is None:
+        layout_config = {}
+
+    if isinstance(layout, dict):
+        return layout
+    elif layout in automatic_layouts and layout not in custom_layouts:
+        auto_layout = automatic_layouts[layout](
+            nx_graph, scale=layout_scale, **layout_config
+        )
+        return dict([(k, np.append(v, [0])) for k, v in auto_layout.items()])
+    elif layout == "tree":
+        return _tree_layout(
+            nx_graph,
+            root_vertex=root_vertex,
+            scale=layout_scale,
+        )
+    elif layout == "partite":
+        if partitions is None or len(partitions) == 0:
+            raise ValueError(
+                "The partite layout requires the 'partitions' parameter to contain the partition of the vertices"
+            )
+        partition_count = len(partitions)
+        for i in range(partition_count):
+            for v in partitions[i]:
+                if nx_graph.nodes[v] is None:
+                    raise ValueError(
+                        "The partition must contain arrays of vertices in the graph"
+                    )
+                nx_graph.nodes[v]["subset"] = i
+        # Add missing vertices to their own side
+        for v in nx_graph.nodes:
+            if "subset" not in nx_graph.nodes[v]:
+                nx_graph.nodes[v]["subset"] = partition_count
+
+        auto_layout = automatic_layouts["partite"](
+            nx_graph, scale=layout_scale, **layout_config
+        )
+        return dict([(k, np.append(v, [0])) for k, v in auto_layout.items()])
+    elif layout == "random":
+        # the random layout places coordinates in [0, 1)
+        # we need to rescale manually afterwards...
+        auto_layout = automatic_layouts["random"](nx_graph, **layout_config)
+        for k, v in auto_layout.items():
+            auto_layout[k] = 2 * layout_scale * (v - np.array([0.5, 0.5]))
+        return dict([(k, np.append(v, [0])) for k, v in auto_layout.items()])
+    else:
+        raise ValueError(
+            f"The layout '{layout}' is neither a recognized automatic layout, "
+            "nor a vertex placement dictionary."
+        )
+
+
+def _tree_layout(
+    G: nx.classes.graph.Graph,
+    root_vertex: Union[Hashable, None],
+    scale: float,
+) -> dict:
+    result = {root_vertex: np.array([0, 0, 0])}
+
+    if not nx.is_tree(G):
+        raise ValueError("The tree layout must be used with trees")
+    if root_vertex is None:
+        raise ValueError("The tree layout requires the root_vertex parameter")
+
+    def _recursive_position_for_row(
+        G: nx.classes.graph.Graph,
+        result: dict,
+        two_rows_before: List[Hashable],
+        last_row: List[Hashable],
+        current_height: float,
+    ):
+        new_row = []
+        for v in last_row:
+            for x in G.neighbors(v):
+                if x not in two_rows_before:
+                    new_row.append(x)
+
+        new_row_length = len(new_row)
+
+        if new_row_length == 0:
+            return
+
+        if new_row_length == 1:
+            result[new_row[0]] = np.array([0, current_height, 0])
+        else:
+            for i in range(new_row_length):
+                result[new_row[i]] = np.array(
+                    [-1 + 2 * i / (new_row_length - 1), current_height, 0]
+                )
+
+        _recursive_position_for_row(
+            G,
+            result,
+            two_rows_before=last_row,
+            last_row=new_row,
+            current_height=current_height + 1,
+        )
+
+    _recursive_position_for_row(
+        G, result, two_rows_before=[], last_row=[root_vertex], current_height=1
+    )
+
+    height = max(map(lambda v: result[v][1], result))
+
+    return dict(
+        [
+            (v, np.array([pos[0], 1 - 2 * pos[1] / height, pos[2]]) * scale / 2)
+            for v, pos in result.items()
+        ]
+    )
 
 
 class Graph(VMobject):
@@ -49,7 +183,7 @@ class Graph(VMobject):
         is set to ``True``. Has no effect for other values of ``labels``.
     layout
         Either one of ``"spring"`` (the default), ``"circular"``, ``"kamada_kawai"``,
-        ``"planar"``, ``"random"``, ``"shell"``, ``"spectral"``, and ``"spiral"``
+        ``"planar"``, ``"random"``, ``"shell"``, ``"spectral"``, ``"spiral"``, ``"tree"``, and ``"partite"``
         for automatic vertex positioning using ``networkx``
         (see `their documentation <https://networkx.org/documentation/stable/reference/drawing.html#module-networkx.drawing.layout>`_
         for more details), or a dictionary specifying a coordinate (value)
@@ -158,6 +292,53 @@ class Graph(VMobject):
                                        (4, 7): {"stroke_color": RED}})
                 self.add(g)
 
+    You can also lay out a partite graph on columns by specifying
+    a list of the vertices on each side and choosing the partite layout.
+
+    .. note::
+
+        All vertices in your graph which are not listed in any of the partitions
+        are collected in their own partition and rendered in the rightmost column.
+
+    .. manim:: PartiteGraph
+        :save_last_frame:
+
+        import networkx as nx
+
+        class PartiteGraph(Scene):
+            def construct(self):
+                G = nx.Graph()
+                G.add_nodes_from([0, 1, 2, 3])
+                G.add_edges_from([(0, 2), (0,3), (1, 2)])
+                graph = Graph(list(G.nodes), list(G.edges), layout="partite", partitions=[[0, 1]])
+                self.play(ShowCreation(graph))
+
+    The custom tree layout can be used to show the graph
+    by distance from the root vertex. You must pass the root vertex
+    of the tree.
+
+    .. manim:: Tree
+
+        from manim import *
+        import networkx as nx
+
+        class Tree(Scene):
+            def construct(self):
+                G = nx.Graph()
+
+                G.add_node("ROOT")
+
+                for i in range(5):
+                    G.add_node("Child_%i" % i)
+                    G.add_node("Grandchild_%i" % i)
+                    G.add_node("Greatgrandchild_%i" % i)
+
+                    G.add_edge("ROOT", "Child_%i" % i)
+                    G.add_edge("Child_%i" % i, "Grandchild_%i" % i)
+                    G.add_edge("Grandchild_%i" % i, "Greatgrandchild_%i" % i)
+
+                self.play(ShowCreation(
+                    Graph(list(G.nodes), list(G.edges), layout="tree", root_vertex="ROOT")))
     """
 
     def __init__(
@@ -172,6 +353,8 @@ class Graph(VMobject):
         vertex_type: "Mobject" = Dot,
         vertex_config: Union[dict, None] = None,
         edge_type: "Mobject" = Line,
+        partitions: Union[List[List[Hashable]], None] = None,
+        root_vertex: Union[Hashable, None] = None,
         edge_config: Union[dict, None] = None,
     ) -> None:
         VMobject.__init__(self)
@@ -181,43 +364,14 @@ class Graph(VMobject):
         nx_graph.add_edges_from(edges)
         self._graph = nx_graph
 
-        automatic_layouts = {
-            "circular": nx.layout.circular_layout,
-            "kamada_kawai": nx.layout.kamada_kawai_layout,
-            "planar": nx.layout.planar_layout,
-            "random": nx.layout.random_layout,
-            "shell": nx.layout.shell_layout,
-            "spectral": nx.layout.spectral_layout,
-            "spiral": nx.layout.spiral_layout,
-            "spring": nx.layout.spring_layout,
-        }
-
-        if layout_config is None:
-            layout_config = {}
-
-        if isinstance(layout, dict):
-            self._layout = layout
-        elif layout in automatic_layouts and layout != "random":
-            self._layout = automatic_layouts[layout](
-                nx_graph, scale=layout_scale, **layout_config
-            )
-            self._layout = dict(
-                [(k, np.append(v, [0])) for k, v in self._layout.items()]
-            )
-        elif layout == "random":
-            # the random layout places coordinates in [0, 1)
-            # we need to rescale manually afterwards...
-            self._layout = automatic_layouts["random"](nx_graph, **layout_config)
-            for k, v in self._layout.items():
-                self._layout[k] = 2 * layout_scale * (v - np.array([0.5, 0.5]))
-            self._layout = dict(
-                [(k, np.append(v, [0])) for k, v in self._layout.items()]
-            )
-        else:
-            raise ValueError(
-                f"The layout '{layout}' is neither a recognized automatic layout, "
-                "nor a vertex placement dictionary."
-            )
+        self._layout = _determine_graph_layout(
+            nx_graph,
+            layout=layout,
+            layout_scale=layout_scale,
+            layout_config=layout_config,
+            partitions=partitions,
+            root_vertex=root_vertex,
+        )
 
         if isinstance(labels, dict):
             self._labels = labels
@@ -289,17 +443,87 @@ class Graph(VMobject):
         self.add(*self.vertices.values())
         self.add(*self.edges.values())
 
-        for (u, v), edge in self.edges.items():
+        def update_edges(graph):
+            for (u, v), edge in graph.edges.items():
+                edge.put_start_and_end_on(graph[u].get_center(), graph[v].get_center())
 
-            def update_edge(e, u=u, v=v):
-                e.set_start_and_end_attrs(self[u].get_center(), self[v].get_center())
-                e.generate_points()
-
-            update_edge(edge)
-            edge.add_updater(update_edge)
+        self.add_updater(update_edges)
 
     def __getitem__(self: "Graph", v: Hashable) -> "Mobject":
         return self.vertices[v]
 
     def __repr__(self: "Graph") -> str:
         return f"Graph on {len(self.vertices)} vertices and {len(self.edges)} edges"
+
+    @staticmethod
+    def from_networkx(nxgraph: nx.classes.graph.Graph, **kwargs) -> "Graph":
+        """Build a :class:`~.Graph` from a given ``networkx`` graph.
+
+        Parameters
+        ----------
+
+        nxgraph
+            A ``networkx`` graph.
+        **kwargs
+            Keywords to be passed to the constructor of :class:`~.Graph`.
+
+        Examples
+        --------
+
+        .. manim:: ImportNetworkxGraph
+
+            import networkx as nx
+
+            nxgraph = nx.erdos_renyi_graph(14, 0.5)
+
+            class ImportNetworkxGraph(Scene):
+                def construct(self):
+                    G = Graph.from_networkx(nxgraph, layout="spring", layout_scale=3.5)
+                    self.play(ShowCreation(G))
+                    self.play(*[G[v].animate.move_to(5*RIGHT*np.cos(ind/7 * PI) +
+                                                     3*UP*np.sin(ind/7 * PI))
+                                for ind, v in enumerate(G.vertices)])
+                    self.play(Uncreate(G))
+
+        """
+        return Graph(list(nxgraph.nodes), list(nxgraph.edges), **kwargs)
+
+    def change_layout(
+        self,
+        layout: Union[str, dict] = "spring",
+        layout_scale: float = 2,
+        layout_config: Union[dict, None] = None,
+        partitions: Union[List[List[Hashable]], None] = None,
+        root_vertex: Union[Hashable, None] = None,
+    ) -> "Graph":
+        """Change the layout of this graph.
+
+        See the documentation of :class:`~.Graph` for details about the
+        keyword arguments.
+
+        Examples
+        --------
+
+        .. manim:: ChangeGraphLayout
+
+            class ChangeGraphLayout(Scene):
+                def construct(self):
+                    G = Graph([1, 2, 3, 4, 5], [(1, 2), (2, 3), (3, 4), (4, 5)],
+                              layout={1: [-2, 0, 0], 2: [-1, 0, 0], 3: [0, 0, 0],
+                                      4: [1, 0, 0], 5: [2, 0, 0]}
+                              )
+                    self.play(ShowCreation(G))
+                    self.play(G.animate.change_layout("circular"))
+                    self.wait()
+        """
+        self._layout = _determine_graph_layout(
+            self._graph,
+            layout=layout,
+            layout_scale=layout_scale,
+            layout_config=layout_config,
+            partitions=partitions,
+            root_vertex=root_vertex,
+        )
+        for v in self.vertices:
+            self[v].move_to(self._layout[v])
+        return self

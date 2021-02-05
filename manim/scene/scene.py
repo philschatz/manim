@@ -16,7 +16,7 @@ from tqdm import tqdm
 import numpy as np
 
 from .. import config, logger
-from ..animation.animation import Animation, Wait
+from ..animation.animation import Animation, Wait, prepare_animation
 from ..animation.transform import MoveToTarget, _MethodAnimation
 from ..camera.camera import Camera
 from ..constants import *
@@ -112,6 +112,7 @@ class Scene(Container):
             if k == "camera_class":
                 setattr(result, k, v)
             setattr(result, k, copy.deepcopy(v, clone_from_id))
+        result.mobject_updater_lists = []
 
         # Update updaters
         for mobject in self.mobjects:
@@ -153,7 +154,10 @@ class Scene(Container):
                     tuple(cloned_closure),
                 )
                 cloned_updaters.append(cloned_updater)
-            clone_from_id[id(mobject)].updaters = cloned_updaters
+            mobject_clone = clone_from_id[id(mobject)]
+            mobject_clone.updaters = cloned_updaters
+            if len(cloned_updaters) > 0:
+                result.mobject_updater_lists.append((mobject_clone, cloned_updaters))
         return result
 
     def render(self):
@@ -607,9 +611,9 @@ class Scene(Container):
         kwargs with kwargs passed to play().
         Parameters
         ----------
-        *animations : Tuple[:class:`Animation`]
+        *args : Tuple[:class:`Animation`]
             Animations to be played.
-        **play_kwargs
+        **kwargs
             Configuration for the call to play().
         Returns
         -------
@@ -618,17 +622,18 @@ class Scene(Container):
         """
         animations = []
         for arg in args:
-            if isinstance(arg, _AnimationBuilder):
-                animations.append(arg.build())
-            elif isinstance(arg, Animation):
-                animations.append(arg)
-            elif inspect.ismethod(arg):
-                raise TypeError(
-                    "Passing Mobject methods to Scene.play is no longer supported. Use "
-                    "Mobject.animate instead."
-                )
-            else:
-                raise TypeError(f"Unexpected argument {arg} passed to Scene.play().")
+            try:
+                animations.append(prepare_animation(arg))
+            except TypeError:
+                if inspect.ismethod(arg):
+                    raise TypeError(
+                        "Passing Mobject methods to Scene.play is no longer"
+                        " supported. Use Mobject.animate instead."
+                    )
+                else:
+                    raise TypeError(
+                        f"Unexpected argument {arg} passed to Scene.play()."
+                    )
 
         for animation in animations:
             for k, v in kwargs.items():
@@ -721,6 +726,7 @@ class Scene(Container):
             times = np.arange(0, run_time, step)
         time_progression = tqdm(
             times,
+            desc=description,
             total=n_iterations,
             leave=config["leave_progress_bars"],
             ascii=True if platform.system() == "Windows" else None,
@@ -880,5 +886,5 @@ class Scene(Container):
         """
         if self.renderer.skip_animations:
             return
-        time = self.time + time_offset
+        time = self.renderer.time + time_offset
         self.renderer.file_writer.add_sound(sound_file, time, gain, **kwargs)
