@@ -8,7 +8,7 @@ class CarnotProcess(GraphScene):
             self,
             x_min= 0.5,
             x_max=4,
-            x_axis_config={"tick_frequency": 4},
+            x_axis_config={"tick_frequency": 3.5},
 
             x_axis_width= 9,
             x_axis_label= "$V$",
@@ -302,12 +302,12 @@ class CarnotProcess(GraphScene):
 
         baths_hotcold.shift(LEFT*DISTANCELEFTRIGHT)
 
-        square= Rectangle(fill_opacity=1).set_stroke(width=0).set_color(RED)
-        square.set_width(0.75)
-        square.set_z_index(-1)
-        square.set_x(center[0])
-        square.set_height((stemp.get_center()-obj.get_bottom())[1]-stamp_thickness/2,stretch=True)
-        square.align_to(obj,DOWN)
+        gas_square= Rectangle(fill_opacity=1).set_stroke(width=0).set_color(RED)
+        gas_square.set_width(0.75)
+        gas_square.set_z_index(-1)
+        gas_square.set_x(center[0])
+        gas_square.set_height((stemp.get_center()-obj.get_bottom())[1]-stamp_thickness/2,stretch=True)
+        gas_square.align_to(obj,DOWN)
 
         def update_gas_square(square):
             square.set_height((stemp.get_center()-obj.get_bottom())[1]-stamp_thickness/2,stretch=True)
@@ -328,7 +328,7 @@ class CarnotProcess(GraphScene):
             square.set_color(cols[integ])
             return square
 
-        self.add(square)
+        self.add(gas_square)
 
         #### START
         sourunding_dot = Dot().scale(1.3).set_fill(color=BLACK).set_z_index(-1)
@@ -336,25 +336,23 @@ class CarnotProcess(GraphScene):
         moving_dot= VGroup(sourunding_dot,innerdot)
         moving_dot.move_to(get_graph_point(val_tracker,isotherm12_graph))
         self.add(moving_dot)
-
         #1-2
-        self.wait()
-        square.add_updater(update_gas_square)
+        gas_square.add_updater(update_gas_square)
         self.play(weight_heavy.animate.shift(RIGHT))
         weight_heavy.add_updater(update_y_coordinate_of_weight_heavy)
         moving_dot.add_updater(lambda x: x.move_to(get_graph_point(val_tracker,isotherm12_graph)))
         self.play(val_tracker.animate.set_value(V2), rate_func= linear, run_time=2)
-        # self.play(baths_hotcold.shift, RIGHT*DISTANCELEFTRIGHT)
+        self.play(baths_hotcold.animate.shift(RIGHT*DISTANCELEFTRIGHT))
         # #2-3
-        # moving_dot.add_updater(lambda x: x.move_to(get_graph_point(val_tracker,adiabatisch23_graph)))
-        # square.add_updater(update_gas_square_turn_blue)
-        # self.play(val_tracker.set_value, V3,  rate_func= linear, run_time=2)
-        # weight_heavy.remove_updater(update_y_coordinate_of_weight_heavy)
-        # self.play(weight_heavy.shift, RIGHT)
-        # self.play(baths_hotcold.shift, RIGHT*DISTANCELEFTRIGHT)
-        # self.play(weight_light.shift, RIGHT)
-        # weight_light.add_updater(update_y_coordinate_of_weight_light)
-        # square.remove_updater(update_gas_square_turn_blue)
+        moving_dot.add_updater(lambda x: x.move_to(get_graph_point(val_tracker,adiabatisch23_graph)))
+        gas_square.add_updater(update_gas_square_turn_blue)
+        self.play(val_tracker.animate.set_value(V3),  rate_func= linear, run_time=2)
+        weight_heavy.remove_updater(update_y_coordinate_of_weight_heavy)
+        self.play(weight_heavy.animate.shift(RIGHT))
+        self.play(baths_hotcold.animate.shift(RIGHT*DISTANCELEFTRIGHT))
+        self.play(weight_light.animate.shift( RIGHT))
+        weight_light.add_updater(update_y_coordinate_of_weight_light)
+        gas_square.remove_updater(update_gas_square_turn_blue)
         #
         # #3-4
         # moving_dot.add_updater(lambda x: x.move_to(get_graph_point(val_tracker,isotherm34_graph_over)))
@@ -363,12 +361,12 @@ class CarnotProcess(GraphScene):
         #
         # #4-1
         # moving_dot.add_updater(lambda x: x.move_to(get_graph_point(val_tracker,adiabatisch41_graph)))
-        # square.add_updater(update_gas_square_turn_red)
+        # gas_square.add_updater(update_gas_square_turn_red)
         # self.play(val_tracker.set_value, V1,  rate_func= linear, run_time=2)
         # self.play(weight_light.shift, RIGHT)
         # weight_light.remove_updater(update_y_coordinate_of_weight_light)
         # self.play(baths_hotcold.shift, LEFT*DISTANCELEFTRIGHT)
-        # square.remove_updater(update_gas_square_turn_red)
+        # gas_square.remove_updater(update_gas_square_turn_red)
         # self.wait()
         #
         # ## new circle
@@ -389,7 +387,7 @@ class CarnotProcess(GraphScene):
         # self.play(VGroup(wl1,wh1).shift,RIGHT)
         #
         # #1-2 second cicle
-        # square.add_updater(update_gas_square)
+        # gas_square.add_updater(update_gas_square)
         # self.play(weight_heavy.shift, RIGHT)
         # weight_heavy.add_updater(update_y_coordinate_of_weight_heavy)
         # moving_dot.add_updater(lambda x: x.move_to(get_graph_point(val_tracker,isotherm12_graph)))
@@ -397,14 +395,14 @@ class CarnotProcess(GraphScene):
         # self.play(baths_hotcold.shift, RIGHT*DISTANCELEFTRIGHT)
         # #2-3
         # moving_dot.add_updater(lambda x: x.move_to(get_graph_point(val_tracker,adiabatisch23_graph)))
-        # square.add_updater(update_gas_square_turn_blue)
+        # gas_square.add_updater(update_gas_square_turn_blue)
         # self.play(val_tracker.set_value, V3,  rate_func= linear, run_time=2)
         # weight_heavy.remove_updater(update_y_coordinate_of_weight_heavy)
         # self.play(weight_heavy.shift, RIGHT)
         # self.play(baths_hotcold.shift, RIGHT*DISTANCELEFTRIGHT)
         # self.play(weight_light.shift, RIGHT)
         # weight_light.add_updater(update_y_coordinate_of_weight_light)
-        # square.remove_updater(update_gas_square_turn_blue)
+        # gas_square.remove_updater(update_gas_square_turn_blue)
         #
         # #3-4
         # moving_dot.add_updater(lambda x: x.move_to(get_graph_point(val_tracker,isotherm34_graph_over)))
@@ -413,7 +411,7 @@ class CarnotProcess(GraphScene):
         #
         # #4-1
         # moving_dot.add_updater(lambda x: x.move_to(get_graph_point(val_tracker,adiabatisch41_graph)))
-        # square.add_updater(update_gas_square_turn_red)
+        # gas_square.add_updater(update_gas_square_turn_red)
         # self.play(val_tracker.set_value, V1,  rate_func= linear, run_time=2)
         # self.play(weight_light.shift, RIGHT)
         # self.play(baths_hotcold.shift, LEFT*DISTANCELEFTRIGHT)
